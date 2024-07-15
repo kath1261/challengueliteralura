@@ -1,0 +1,41 @@
+package com.alura.literalura.service;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
+
+public class GutendexResponse {
+    private int count;
+    private List<GutendexBook> results;
+
+    // Getters y Setters
+}
+
+class GutendexBook {
+    private String title;
+    private List<AuthorDTO> authors;
+    private List<String> languages;
+    @JsonProperty("download_count")
+    private int downloadCount;
+
+    // Getters y Setters
+}
+
+class AuthorDTO {
+    @JsonProperty("birth_year")
+    private int birthYear;
+    @JsonProperty("death_year")
+    private int deathYear;
+    @JsonProperty("name")
+    private String name;
+
+    // Métodos adicionales para obtener firstName y lastName
+    public String getFirstName() {
+        return name.split(" ")[0];
+    }
+
+    public String getLastName() {
+        return name.split(" ")[1];
+    }
+
+    // Getters y Setters
+}
