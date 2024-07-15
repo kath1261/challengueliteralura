@@ -1,0 +1,75 @@
+package com.alura.literalura.controller;
+
+import com.alura.literalura.model.Book;
+import com.alura.literalura.model.Author;
+import com.alura.literalura.service.BookService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Controller;
+import java.util.List;
+import java.util.Scanner;
+
+@Controller
+public class ConsoleController implements CommandLineRunner {
+    @Autowired
+    private BookService bookService;
+
+    @Override
+    public void run(String... args) throws Exception {
+        Scanner scanner = new Scanner(System.in);
+        boolean exit = false;
+
+        while (!exit) {
+            System.out.println("Seleccione una opción:");
+            System.out.println("1. Buscar libro por título");
+            System.out.println("2. Listar libros registrados");
+            System.out.println("3. Listar autores registrados");
+            System.out.println("4. Listar autores vivos en un año específico");
+            System.out.println("5. Listar libros por idioma");
+            System.out.println("6. Salir");
+
+            int option = scanner.nextInt();
+            scanner.nextLine(); // Consumir nueva línea
+
+            switch (option) {
+                case 1:
+                    System.out.println("Ingrese el título del libro:");
+                    String title = scanner.nextLine();
+                    Book book = bookService.searchAndSaveBook(title);
+                    if (book != null) {
+                        System.out.println("Libro encontrado y guardado: " + book);
+                    } else {
+                        System.out.println("Libro no encontrado o ya está en la base de datos.");
+                    }
+                    break;
+                case 2:
+                    List<Book> books = bookService.listAllBooks();
+                    books.forEach(System.out::println);
+                    break;
+                case 3:
+                    List<Author> authors = bookService.listAllAuthors();
+                    authors.forEach(System.out::println);
+                    break;
+                case 4:
+                    System.out.println("Ingrese el año:");
+                    int year = scanner.nextInt();
+                    List<Author> aliveAuthors = bookService.listAuthorsAliveInYear(year);
+                    aliveAuthors.forEach(System.out::println);
+                    break;
+                case 5:
+                    System.out.println("Ingrese el idioma (ES, EN, FR, PT):");
+                    String language = scanner.nextLine();
+                    List<Book> booksByLanguage = bookService.listBooksByLanguage(language);
+                    booksByLanguage.forEach(System.out::println);
+                    break;
+                case 6:
+                    exit = true;
+                    break;
+                default:
+                    System.out.println("Opción no válida.");
+            }
+        }
+
+        scanner.close();
+    }
+}
