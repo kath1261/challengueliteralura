@@ -1,0 +1,68 @@
+package com.alura.literalura.service;
+
+import com.alura.literalura.model.Book;
+import com.alura.literalura.model.Author;
+import com.alura.literalura.repository.BookRepository;
+import com.alura.literalura.repository.AuthorRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class BookService {
+    @Autowired
+    private BookRepository bookRepository;
+
+    @Autowired
+    private AuthorRepository authorRepository;
+
+    private static final String GUTENDEX_API_URL = "https://gutendex.com/books/";
+
+    public Book searchAndSaveBook(String title) {
+        RestTemplate restTemplate = new RestTemplate();
+        String url = GUTENDEX_API_URL + "?search=" + title;
+
+        GutendexResponse response = restTemplate.getForObject(url, GutendexResponse.class);
+        if (response == null || response.getResults().isEmpty()) {
+            return null;
+        }
+
+        GutendexBook gutendexBook = response.getResults().get(0);
+
+        if (bookRepository.existsByTitle(gutendexBook.getTitle())) {
+            return null; // El libro ya está en la base de datos
+        }
+
+        Author author = new Author();
+        author.setFirstName(gutendexBook.getAuthors().get(0).getFirstName());
+        author.setLastName(gutendexBook.getAuthors().get(0).getLastName());
+        author = authorRepository.save(author);
+
+        Book book = new Book();
+        book.setTitle(gutendexBook.getTitle());
+        book.setAuthor(author);
+        book.setLanguage(gutendexBook.getLanguages().get(0));
+        book.setDownloads(gutendexBook.getDownloadCount());
+
+        return bookRepository.save(book);
+    }
+
+    public List<Book> listAllBooks() {
+        return bookRepository.findAll();
+    }
+
+    public List<Author> listAllAuthors() {
+        return authorRepository.findAll();
+    }
+
+    public List<Author> listAuthorsAliveInYear(int year) {
+        // Implementa la lógica para listar autores vivos en un año específico
+        return null;
+    }
+
+    public List<Book> listBooksByLanguage(String language) {
+        return bookRepository.findByLanguage(language);
+    }
+}
